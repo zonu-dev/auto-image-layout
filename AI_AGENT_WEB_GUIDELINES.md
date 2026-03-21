@@ -174,6 +174,20 @@ Examples:
 - After deployment, verify the public URL directly.
 - If search traffic matters, recommend adding the site to Google Search Console after publish.
 
+## GitHub Repository Visibility Rules
+
+- If the project is hosted on GitHub, make the repository page link to the public site.
+- Set the repository `About` section `Website` to the public URL.
+- Set the repository `Description` to a short functional summary.
+- Add repository topics that match the tool category and stack.
+- Prefer repository metadata that helps both discovery and direct navigation from the repo page.
+
+Examples:
+
+- Website: public deployment URL
+- Description: `複数画像を1枚に連結して保存できるWebツール`
+- Topics: `image-tool`, `image-merge`, `github-pages`, `react`, `typescript`, `vite`
+
 ## Mandatory Browser Verification
 
 When changing layout or styling, do not stop at code review. Open the page and inspect it.
@@ -220,6 +234,7 @@ After implementation:
 - Verify the screen in a browser.
 - If the page is public, verify title and metadata in built output.
 - If the page uses a subpath deployment, verify the built output under that subpath.
+- If the project is on GitHub, verify that the repository page links to the public site.
 
 ## Final Report Rules
 
