@@ -1,0 +1,80 @@
+:root {
+  font-family: 'M PLUS 1', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+  line-height: 1.5;
+  font-weight: 500;
+  color: #e8e8e6;
+  background: #191919;
+  color-scheme: dark;
+  font-optical-sizing: auto;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --font-family-base: 'M PLUS 1', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+  --font-weight-muted: 400;
+  --font-weight-body: 500;
+  --font-weight-label: 600;
+  --font-weight-heading: 700;
+  --font-weight-display: 800;
+  --font-weight-button: 600;
+  --accent: #4f9cf9;
+  --focus: rgba(79, 156, 249, 0.36);
+  --toggle-on: #2383e2;
+  --heading: #f1f1ef;
+  --text: #d8d8d4;
+  --text-muted: #9b9a97;
+  --panel-bg: transparent;
+  --surface: #242424;
+  --surface-hover: #2c2c2c;
+  --surface-subtle: #202020;
+  --dropzone-bg: #202020;
+  --dropzone-active-bg: #282828;
+  --pill-bg: transparent;
+  --border-soft: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --shadow-soft: none;
+  --checkerboard: #252525;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #191919;
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-body);
+}
+
+::selection {
+  background: rgba(79, 156, 249, 0.22);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  appearance: none;
+}
+
+a {
+  color: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}

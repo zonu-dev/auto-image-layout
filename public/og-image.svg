@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#191919"/>
+  <rect x="72" y="72" width="1056" height="486" rx="28" fill="#202020" stroke="#FFFFFF" stroke-opacity="0.12"/>
+  <rect x="120" y="126" width="352" height="320" rx="20" fill="#242424" stroke="#FFFFFF" stroke-opacity="0.08"/>
+  <rect x="154" y="164" width="124" height="124" rx="16" fill="#2C2C2C"/>
+  <rect x="296" y="164" width="124" height="124" rx="16" fill="#3A3A3A"/>
+  <rect x="154" y="306" width="266" height="26" rx="13" fill="#2C2C2C"/>
+  <rect x="154" y="352" width="180" height="18" rx="9" fill="#2C2C2C"/>
+  <rect x="154" y="398" width="144" height="18" rx="9" fill="#2C2C2C"/>
+  <text x="518" y="220" fill="#F1F1EF" font-family="'M PLUS 1', 'Hiragino Sans', sans-serif" font-size="64" font-weight="800">画像連結ツール</text>
+  <text x="518" y="302" fill="#D8D8D4" font-family="'M PLUS 1', 'Hiragino Sans', sans-serif" font-size="30" font-weight="500">複数画像を横並び・縦並びで連結して保存</text>
+  <text x="518" y="352" fill="#9B9A97" font-family="'M PLUS 1', 'Hiragino Sans', sans-serif" font-size="24" font-weight="500">順番変更 / 間隔調整 / 背景色 / PNG・JPEG・WebP</text>
+  <rect x="518" y="420" width="212" height="56" rx="14" fill="#242424" stroke="#FFFFFF" stroke-opacity="0.08"/>
+  <text x="553" y="456" fill="#F1F1EF" font-family="'M PLUS 1', 'Hiragino Sans', sans-serif" font-size="26" font-weight="700">ブラウザで使える</text>
+</svg>
