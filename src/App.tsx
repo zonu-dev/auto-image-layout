@@ -363,7 +363,6 @@ function App() {
             <span className="panel-heading__number">1</span>
             <div className="panel-heading__copy">
               <h2>{t.settingsTitle}</h2>
-              <p>{t.settingsDescription}</p>
             </div>
           </div>
 
@@ -634,7 +633,6 @@ function App() {
             <span className="panel-heading__number">2</span>
             <div className="panel-heading__copy">
               <h2>{t.previewTitle}</h2>
-              <p>{t.previewDescription}</p>
             </div>
           </div>
 
