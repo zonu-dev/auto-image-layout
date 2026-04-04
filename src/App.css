@@ -95,6 +95,8 @@
   display: grid;
   gap: 16px;
   margin-top: 6px;
+  position: relative;
+  z-index: 30;
 }
 
 .header-card,
