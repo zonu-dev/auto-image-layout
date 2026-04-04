@@ -64,9 +64,12 @@ function App() {
   const deferredNormalizeCrossAxis = useDeferredValue(normalizeCrossAxis)
   const deferredGap = useDeferredValue(Number.isFinite(gap) ? Math.max(0, gap) : 0)
 
-  const safeBackgroundColor = normalizeHexColor(backgroundColor) ?? DEFAULT_BACKGROUND
+  const normalizedBackgroundColor = normalizeHexColor(backgroundColor)
+  const safeBackgroundColor = normalizedBackgroundColor ?? DEFAULT_BACKGROUND
   const activeFormat = FORMAT_OPTIONS.find((option) => option.value === format) ?? FORMAT_OPTIONS[0]
   const normalizeLabel = direction === 'horizontal' ? '高さを揃える' : '幅を揃える'
+  const directionLabel = direction === 'horizontal' ? '横並び' : '縦並び'
+  const normalizeSummary = normalizeCrossAxis ? '自動で揃える' : '元の比率を保つ'
   const previewPlan =
     deferredItems.length > 0
       ? buildRenderPlan(deferredItems, {
@@ -80,6 +83,10 @@ function App() {
     ? { width: previewPlan.width, height: previewPlan.height }
     : null
   const canDownload = items.length > 0 && previewPlan !== null && !previewError
+  const backgroundLabel = safeBackgroundColor.toUpperCase()
+  const previewSizeLabel = previewState
+    ? `${previewState.width}×${previewState.height}px`
+    : 'サイズ未確定'
 
   useEffect(() => {
     itemsRef.current = items
@@ -273,296 +280,424 @@ function App() {
   }
 
   return (
-    <main className="app-shell">
-      <section className="hero-panel">
-        <div>
-          <h1>画像連結ツール</h1>
-          <p className="hero-copy">
-            複数の画像を並べて、1枚の画像として保存できます。設定を変えると仕上がりをすぐに確認できます。
-          </p>
-        </div>
-      </section>
+    <main className="app-shell theme-auto">
+      <header className="page-header">
+        <section className="hero-card solid-shadow">
+          <div className="page-toolbar">
+            <a
+              className="zoochi-link"
+              href="https://zoochigames.com/index.html"
+              aria-label="ZOOCHIのトップページへ"
+            >
+              <img src="/zoochi-logo.png" alt="ZOOCHI" />
+            </a>
+
+            <a className="page-toolbar__link toy-btn" href="https://zoochigames.com/index.html">
+              トップページへ
+            </a>
+          </div>
+
+          <div className="hero-card__hero">
+            <div className="hero-card__badge-wrap" aria-hidden="true">
+              <div className="hero-card__badge">
+                <img src="/app-icon.png" alt="" className="hero-card__badge-icon" />
+              </div>
+            </div>
+
+            <div className="hero-card__copy">
+              <div className="meta-pills">
+                <span className="meta-pill meta-pill--brand">AUTO IMAGE LAYOUT</span>
+                <span className="meta-pill">ブラウザでそのまま保存</span>
+                <span className="meta-pill">順番もすぐ入れ替え</span>
+              </div>
+
+              <h1 className="hero-title">画像を1枚につなげる</h1>
+
+              <p className="hero-copy">
+                複数の画像を横または縦に並べて、1枚の画像として保存できます。順番、間隔、背景色を変えると、仕上がりがその場で反映されます。
+              </p>
+
+              <ul className="feature-tags" aria-label="主な特徴">
+                <li>ドラッグで並び替え</li>
+                <li>横並びも縦並びも対応</li>
+                <li>PNG / JPEG / WebPで保存</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </header>
 
       <div className="workspace">
-        <section className="panel controls-panel">
-          <div className="panel-header">
-            <div className="title-with-icon">
-              <Icon name="sliders" size={18} />
-              <h2>設定</h2>
+        <section className="tool-panel solid-shadow">
+          <div className="panel-heading">
+            <span className="panel-heading__number">1</span>
+            <div className="panel-heading__copy">
+              <h2>設定と画像</h2>
+              <p>追加、並び替え、書き出し設定をここで整えます。</p>
             </div>
           </div>
 
-          <div className="settings-list">
-            <div className="setting-block">
-              <div className="direction-picker">
-                <button
-                  type="button"
-                  className={`direction-card ${direction === 'horizontal' ? 'is-selected' : ''}`}
-                  onClick={() => setDirection('horizontal')}
-                  aria-pressed={direction === 'horizontal'}
-                >
-                  <Icon name="arrow-right" size={18} className="direction-icon" />
-                  <span className="direction-card-title">横並び</span>
-                </button>
-                <button
-                  type="button"
-                  className={`direction-card ${direction === 'vertical' ? 'is-selected' : ''}`}
-                  onClick={() => setDirection('vertical')}
-                  aria-pressed={direction === 'vertical'}
-                >
-                  <Icon name="arrow-down" size={18} className="direction-icon" />
-                  <span className="direction-card-title">縦並び</span>
-                </button>
+          <div className="panel-surface">
+            <div className="subsection-header">
+              <div className="title-with-icon">
+                <Icon name="upload" size={18} />
+                <h3>画像を追加</h3>
+              </div>
+              <span className="subtle-pill">{items.length}枚</span>
+            </div>
+
+            <button
+              type="button"
+              className={`dropzone toy-btn ${isFileDragActive ? 'is-active' : ''}`}
+              onClick={() => fileInputRef.current?.click()}
+              onDrop={handleFileDrop}
+              onDragOver={handleFileDragOver}
+              onDragEnter={handleFileDragOver}
+              onDragLeave={() => setIsFileDragActive(false)}
+            >
+              <span className="dropzone-head">
+                <span className="dropzone-icon-wrap">
+                  <Icon name="upload" className="dropzone-icon" size={20} />
+                </span>
+                <span className="dropzone-title">ドラッグ&amp;ドロップ、またはクリックして選択</span>
+              </span>
+              <span className="dropzone-copy">複数画像をまとめて追加できます。</span>
+            </button>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="visually-hidden"
+              onChange={handleFileInput}
+            />
+          </div>
+
+          <div className="panel-surface">
+            <div className="subsection-header">
+              <div className="title-with-icon">
+                <Icon name="sliders" size={18} />
+                <h3>見た目を決める</h3>
               </div>
             </div>
 
-            <div className="setting-row">
-              <span className="setting-label">
-                <Icon name="maximize-2" size={15} className="field-icon" />
-                <span className="field-label">{normalizeLabel}</span>
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={normalizeCrossAxis}
-                className={`toggle ${normalizeCrossAxis ? 'is-on' : ''}`}
-                onClick={() => setNormalizeCrossAxis((current) => !current)}
-              >
-                <span className="toggle-thumb" />
-              </button>
-            </div>
-
-            <label className="setting-row">
-              <span className="setting-label">
-                <Icon name="more-horizontal" size={15} className="field-icon" />
-                <span className="field-label">間隔</span>
-              </span>
-              <input
-                className="compact-input"
-                type="number"
-                min={0}
-                step={1}
-                value={gap}
-                onChange={(event) => setGap(Number(event.target.value))}
-              />
-            </label>
-
-            <div className="setting-stack">
-              <div className="setting-row">
-                <span className="setting-label">
-                  <Icon name="droplet" size={15} className="field-icon" />
-                  <span className="field-label">背景色</span>
-                </span>
-                <div className="color-inline">
-                  <input
-                    type="color"
-                    value={safeBackgroundColor}
-                    onChange={(event) => setBackgroundColor(event.target.value)}
-                    aria-label="背景色"
-                  />
-                  <input
-                    className="compact-input color-text-input"
-                    type="text"
-                    value={backgroundColor}
-                    onChange={(event) => setBackgroundColor(event.target.value.trim())}
-                    placeholder="#FFFFFF"
-                    spellCheck={false}
-                  />
+            <div className="settings-list">
+              <div className="setting-block">
+                <span className="setting-caption">並び方向</span>
+                <div className="direction-picker">
+                  <button
+                    type="button"
+                    className={`direction-card toy-btn ${
+                      direction === 'horizontal' ? 'is-selected' : ''
+                    }`}
+                    onClick={() => setDirection('horizontal')}
+                    aria-pressed={direction === 'horizontal'}
+                  >
+                    <span className="direction-icon-wrap">
+                      <Icon name="arrow-right" size={18} className="direction-icon" />
+                    </span>
+                    <span className="direction-card-title">横並び</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`direction-card toy-btn ${
+                      direction === 'vertical' ? 'is-selected' : ''
+                    }`}
+                    onClick={() => setDirection('vertical')}
+                    aria-pressed={direction === 'vertical'}
+                  >
+                    <span className="direction-icon-wrap">
+                      <Icon name="arrow-down" size={18} className="direction-icon" />
+                    </span>
+                    <span className="direction-card-title">縦並び</span>
+                  </button>
                 </div>
               </div>
-              {normalizeHexColor(backgroundColor) === null && (
-                <span className="field-help">#RGB または #RRGGBB で入力してください。</span>
-              )}
-            </div>
 
-            <label className="setting-row">
-              <span className="setting-label">
-                <Icon name="file-text" size={15} className="field-icon" />
-                <span className="field-label">書き出し形式</span>
-              </span>
-              <select
-                className="compact-select"
-                value={format}
-                onChange={(event) => setFormat(event.target.value as ExportFormat)}
-              >
-                {FORMAT_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+              <div className="setting-row">
+                <span className="setting-label">
+                  <Icon name="maximize-2" size={16} className="field-icon" />
+                  <span className="field-copy">
+                    <span className="field-label">{normalizeLabel}</span>
+                    <span className="field-value">{normalizeSummary}</span>
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={normalizeCrossAxis}
+                  className={`toggle ${normalizeCrossAxis ? 'is-on' : ''}`}
+                  onClick={() => setNormalizeCrossAxis((current) => !current)}
+                >
+                  <span className="toggle-thumb" />
+                </button>
+              </div>
+
+              <label className="setting-row">
+                <span className="setting-label">
+                  <Icon name="more-horizontal" size={16} className="field-icon" />
+                  <span className="field-copy">
+                    <span className="field-label">間隔</span>
+                    <span className="field-value">{gap}px</span>
+                  </span>
+                </span>
+                <input
+                  className="compact-input"
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={gap}
+                  onChange={(event) => setGap(Number(event.target.value))}
+                />
+              </label>
+
+              <div className="setting-stack">
+                <div className="setting-row">
+                  <span className="setting-label">
+                    <Icon name="droplet" size={16} className="field-icon" />
+                    <span className="field-copy">
+                      <span className="field-label">背景色</span>
+                      <span className="field-value">{backgroundLabel}</span>
+                    </span>
+                  </span>
+                  <div className="color-inline">
+                    <input
+                      type="color"
+                      value={safeBackgroundColor}
+                      onChange={(event) => setBackgroundColor(event.target.value)}
+                      aria-label="背景色"
+                    />
+                    <input
+                      className="compact-input color-text-input"
+                      type="text"
+                      value={backgroundColor}
+                      onChange={(event) => setBackgroundColor(event.target.value.trim())}
+                      placeholder="#FFFFFF"
+                      spellCheck={false}
+                    />
+                  </div>
+                </div>
+                {normalizedBackgroundColor === null && (
+                  <span className="field-help">#RGB または #RRGGBB で入力してください。</span>
+                )}
+              </div>
+
+              <label className="setting-row">
+                <span className="setting-label">
+                  <Icon name="file-text" size={16} className="field-icon" />
+                  <span className="field-copy">
+                    <span className="field-label">書き出し形式</span>
+                    <span className="field-value">{activeFormat.label}</span>
+                  </span>
+                </span>
+                <select
+                  className="compact-select"
+                  value={format}
+                  onChange={(event) => setFormat(event.target.value as ExportFormat)}
+                >
+                  {FORMAT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
           </div>
 
-          <div className="section-header">
-            <div className="section-header-main">
+          <div className="panel-surface">
+            <div className="subsection-header">
               <div className="title-with-icon">
                 <Icon name="image" size={18} />
                 <h3>画像一覧</h3>
               </div>
+              <button
+                type="button"
+                className="secondary-button toy-btn"
+                onClick={clearItems}
+                disabled={items.length === 0}
+              >
+                <Icon name="trash-2" size={16} />
+                クリア
+              </button>
             </div>
-            <button
-              type="button"
-              className="text-button"
-              onClick={clearItems}
-              disabled={items.length === 0}
-            >
-              <Icon name="trash-2" size={16} className="button-icon" />
-              クリア
-            </button>
-          </div>
 
-          <button
-            type="button"
-            className={`dropzone ${isFileDragActive ? 'is-active' : ''}`}
-            onClick={() => fileInputRef.current?.click()}
-            onDrop={handleFileDrop}
-            onDragOver={handleFileDragOver}
-            onDragEnter={handleFileDragOver}
-            onDragLeave={() => setIsFileDragActive(false)}
-          >
-            <span className="dropzone-head">
-              <Icon name="upload" className="dropzone-icon" size={20} />
-              <span className="dropzone-title">画像を追加</span>
-            </span>
-            <span className="dropzone-copy">ドラッグ&amp;ドロップ、またはクリックして選択</span>
-          </button>
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="visually-hidden"
-            onChange={handleFileInput}
-          />
-
-          {items.length === 0 ? (
-            <div className="empty-card">
-              <Icon name="image" className="empty-icon" size={28} />
-              <p>画像を追加すると一覧が表示されます。</p>
-            </div>
-          ) : (
-            <div className="image-list" role="list" aria-label="アップロード画像一覧">
-              {items.map((item, index) => (
-                <article
-                  key={item.id}
-                  role="listitem"
-                  className={`image-card ${draggedItemId === item.id ? 'is-dragging' : ''}`}
-                  draggable
-                  onDragStart={() => setDraggedItemId(item.id)}
-                  onDragEnd={() => setDraggedItemId(null)}
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={(event) => {
-                    event.preventDefault()
-                    if (draggedItemId) {
-                      reorderItems(draggedItemId, item.id)
-                    }
-                    setDraggedItemId(null)
-                  }}
-                >
-                  <div className="image-card-order">
-                    <button
-                      type="button"
-                      onClick={() => moveItem(item.id, index - 1)}
-                      disabled={index === 0}
-                      aria-label={`${item.name} を上へ移動`}
-                    >
-                      <Icon name="arrow-up" size={16} />
-                    </button>
-                    <span className="image-card-index">{index + 1}</span>
-                    <button
-                      type="button"
-                      onClick={() => moveItem(item.id, index + 1)}
-                      disabled={index === items.length - 1}
-                      aria-label={`${item.name} を下へ移動`}
-                    >
-                      <Icon name="arrow-down" size={16} />
-                    </button>
-                  </div>
-
-                  <img src={item.url} alt="" className="image-thumb" loading="lazy" />
-
-                  <div className="image-card-body">
-                    <div className="image-card-header">
-                      <strong title={item.name}>{item.name}</strong>
-                    </div>
-                    <p>
-                      {item.width}×{item.height}px
-                    </p>
-                    <p>{formatBytes(item.size)}</p>
-                  </div>
-
-                  <div className="image-card-actions">
-                    <button
-                      type="button"
-                      className="danger-button"
-                      onClick={() => removeItem(item.id)}
-                      aria-label={`${item.name} を削除`}
-                      title="削除"
-                    >
-                      <Icon name="trash-2" size={16} />
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="panel preview-panel">
-          <div className="panel-header">
-            <div className="title-with-icon">
-              <Icon name="eye" size={18} />
-              <h2>プレビュー</h2>
-            </div>
-            <button
-              type="button"
-              className="primary-button"
-              onClick={() => void handleDownload()}
-              disabled={!canDownload}
-            >
-              <Icon name="download" size={16} className="button-icon" />
-              ダウンロード
-            </button>
-          </div>
-
-          <div className="preview-meta">
-            <span>
-              <Icon name="image" size={14} className="meta-icon" />
-              {items.length}枚
-            </span>
-            <span>
-              <Icon name="maximize-2" size={14} className="meta-icon" />
-              {previewState ? `${previewState.width}×${previewState.height}px` : 'サイズ未確定'}
-            </span>
-            <span>
-              <Icon
-                name={direction === 'horizontal' ? 'arrow-right' : 'arrow-down'}
-                size={14}
-                className="meta-icon"
-              />
-              {direction === 'horizontal' ? '横並び' : '縦並び'}
-            </span>
-          </div>
-
-          {previewError && <p className="error-banner">{previewError}</p>}
-
-          <div className="preview-stage">
             {items.length === 0 ? (
-              <div className="preview-placeholder">
-                <Icon name="image" className="empty-icon" size={32} />
-                <h3>画像がありません</h3>
-                <p>画像を追加するとここに表示されます。</p>
+              <div className="empty-card">
+                <Icon name="image" className="empty-icon" size={28} />
+                <p>画像を追加するとここに一覧が表示されます。</p>
               </div>
             ) : (
-              <div className="canvas-wrap">
-                <canvas ref={canvasRef} className="result-canvas" />
+              <div className="image-list" role="list" aria-label="アップロード画像一覧">
+                {items.map((item, index) => (
+                  <article
+                    key={item.id}
+                    role="listitem"
+                    className={`image-card ${draggedItemId === item.id ? 'is-dragging' : ''}`}
+                    draggable
+                    onDragStart={() => setDraggedItemId(item.id)}
+                    onDragEnd={() => setDraggedItemId(null)}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => {
+                      event.preventDefault()
+                      if (draggedItemId) {
+                        reorderItems(draggedItemId, item.id)
+                      }
+                      setDraggedItemId(null)
+                    }}
+                  >
+                    <div className="image-card-order">
+                      <button
+                        type="button"
+                        className="icon-button"
+                        onClick={() => moveItem(item.id, index - 1)}
+                        disabled={index === 0}
+                        aria-label={`${item.name} を上へ移動`}
+                      >
+                        <Icon name="arrow-up" size={16} />
+                      </button>
+                      <span className="image-card-index">{index + 1}</span>
+                      <button
+                        type="button"
+                        className="icon-button"
+                        onClick={() => moveItem(item.id, index + 1)}
+                        disabled={index === items.length - 1}
+                        aria-label={`${item.name} を下へ移動`}
+                      >
+                        <Icon name="arrow-down" size={16} />
+                      </button>
+                    </div>
+
+                    <img src={item.url} alt="" className="image-thumb" loading="lazy" />
+
+                    <div className="image-card-body">
+                      <div className="image-card-header">
+                        <strong title={item.name}>{item.name}</strong>
+                      </div>
+                      <p>
+                        {item.width}×{item.height}px
+                      </p>
+                      <p>{formatBytes(item.size)}</p>
+                    </div>
+
+                    <div className="image-card-actions">
+                      <button
+                        type="button"
+                        className="icon-button"
+                        onClick={() => removeItem(item.id)}
+                        aria-label={`${item.name} を削除`}
+                        title="削除"
+                      >
+                        <Icon name="trash-2" size={16} />
+                      </button>
+                    </div>
+                  </article>
+                ))}
               </div>
             )}
           </div>
         </section>
+
+        <section className="tool-panel solid-shadow">
+          <div className="panel-heading">
+            <span className="panel-heading__number">2</span>
+            <div className="panel-heading__copy">
+              <h2>プレビュー</h2>
+              <p>仕上がりサイズを確認して、そのまま保存できます。</p>
+            </div>
+          </div>
+
+          <div className="summary-grid" aria-label="現在の状態">
+            <div className="summary-card">
+              <span className="summary-card__label">画像</span>
+              <strong>{items.length}枚</strong>
+            </div>
+            <div className="summary-card">
+              <span className="summary-card__label">配置</span>
+              <strong>{directionLabel}</strong>
+            </div>
+            <div className="summary-card">
+              <span className="summary-card__label">出力サイズ</span>
+              <strong>{previewSizeLabel}</strong>
+            </div>
+            <div className="summary-card">
+              <span className="summary-card__label">背景色</span>
+              <strong>{backgroundLabel}</strong>
+            </div>
+          </div>
+
+          {previewError && <p className="error-banner">{previewError}</p>}
+
+          <div className="panel-surface preview-surface">
+            <div className="subsection-header subsection-header--preview">
+              <div className="title-with-icon">
+                <Icon name="eye" size={18} />
+                <h3>仕上がり</h3>
+              </div>
+              <button
+                type="button"
+                className="action-button toy-btn"
+                onClick={() => void handleDownload()}
+                disabled={!canDownload}
+              >
+                <span className="action-button__label">この設定で保存</span>
+                <span className="action-button__icon" aria-hidden="true">
+                  <Icon name="arrow-right" size={16} />
+                </span>
+              </button>
+            </div>
+
+            <div className="preview-stage">
+              {items.length === 0 ? (
+                <div className="preview-placeholder">
+                  <Icon name="image" className="empty-icon" size={32} />
+                  <h3>画像がありません</h3>
+                  <p>左側から画像を追加すると、ここに仕上がりが表示されます。</p>
+                </div>
+              ) : (
+                <div className="canvas-wrap">
+                  <canvas ref={canvasRef} className="result-canvas" />
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
       </div>
+
+      <footer className="tips-panel solid-shadow">
+        <div className="tips-panel__orb" aria-hidden="true" />
+        <h2 className="tips-panel__heading">使い方のヒント</h2>
+        <div className="tips-grid">
+          <article className="tip-card">
+            <span className="tip-card__icon" aria-hidden="true">
+              <Icon name="upload" size={18} />
+            </span>
+            <div className="tip-card__copy">
+              <h3>まとめて追加</h3>
+              <p>複数画像を一度に入れて、あとから順番を整えられます。</p>
+            </div>
+          </article>
+          <article className="tip-card">
+            <span className="tip-card__icon" aria-hidden="true">
+              <Icon name="more-horizontal" size={18} />
+            </span>
+            <div className="tip-card__copy">
+              <h3>間隔と背景色</h3>
+              <p>透過画像を使うときは背景色を決めると仕上がりが安定します。</p>
+            </div>
+          </article>
+          <article className="tip-card">
+            <span className="tip-card__icon" aria-hidden="true">
+              <Icon name="download" size={18} />
+            </span>
+            <div className="tip-card__copy">
+              <h3>保存前に確認</h3>
+              <p>サイズが大きすぎると保存できないので、警告が出たら設定を見直してください。</p>
+            </div>
+          </article>
+        </div>
+      </footer>
     </main>
   )
 }

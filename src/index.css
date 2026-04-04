@@ -1,40 +1,40 @@
 :root {
-  font-family: 'M PLUS 1', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
-  line-height: 1.5;
-  font-weight: 500;
-  color: #e8e8e6;
-  background: #191919;
-  color-scheme: dark;
+  color-scheme: light;
+  font-family: 'Zen Maru Gothic', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
   font-optical-sizing: auto;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --font-family-base: 'M PLUS 1', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
-  --font-weight-muted: 400;
-  --font-weight-body: 500;
-  --font-weight-label: 600;
-  --font-weight-heading: 700;
-  --font-weight-display: 800;
-  --font-weight-button: 600;
-  --accent: #4f9cf9;
-  --focus: rgba(79, 156, 249, 0.36);
-  --toggle-on: #2383e2;
-  --heading: #f1f1ef;
-  --text: #d8d8d4;
-  --text-muted: #9b9a97;
-  --panel-bg: transparent;
-  --surface: #242424;
-  --surface-hover: #2c2c2c;
-  --surface-subtle: #202020;
-  --dropzone-bg: #202020;
-  --dropzone-active-bg: #282828;
-  --pill-bg: transparent;
-  --border-soft: rgba(255, 255, 255, 0.09);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --shadow-soft: none;
-  --checkerboard: #252525;
+  --font-family-base: 'Zen Maru Gothic', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+
+  --bg: #f4f7f9;
+  --bg-dot: rgba(148, 163, 184, 0.34);
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --surface-dark: #1e293b;
+
+  --text: #1e293b;
+  --muted: #64748b;
+  --line: #cbd5e1;
+  --line-strong: #cbd5e1;
+  --button-hover-line: #475569;
+
+  --shadow: var(--line);
+  --shadow-dark: rgba(15, 23, 42, 0.18);
+  --button-shadow: var(--line);
+
+  --orange: #fb923c;
+  --orange-deep: #ea580c;
+  --orange-soft: #fff7ed;
+  --orange-soft-border: #fed7aa;
+
+  --theme-accent: var(--orange);
+  --theme-accent-deep: var(--orange-deep);
+  --theme-soft: var(--orange-soft);
+  --theme-soft-border: var(--orange-soft-border);
+  --theme-ink: var(--orange-deep);
 }
 
 *,
@@ -48,16 +48,43 @@ html {
 }
 
 body {
-  margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #191919;
+  margin: 0;
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--bg-dot) 1.4px, transparent 1.4px);
+  background-size: 24px 24px;
+  color: var(--text);
   font-family: var(--font-family-base);
-  font-weight: var(--font-weight-body);
+  line-height: 1.7;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.6), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24), transparent 36%);
+  z-index: 0;
 }
 
 ::selection {
-  background: rgba(79, 156, 249, 0.22);
+  background: rgba(251, 146, 60, 0.22);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
 }
 
 button,
@@ -71,10 +98,17 @@ button {
   appearance: none;
 }
 
-a {
-  color: inherit;
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(234, 88, 12, 0.16);
+  outline-offset: 3px;
 }
 
 #root {
   min-height: 100vh;
+  position: relative;
+  z-index: 1;
 }
