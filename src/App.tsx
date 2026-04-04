@@ -695,40 +695,6 @@ function App() {
         </section>
       </div>
 
-      <footer className="tips-panel solid-shadow">
-        <div className="tips-panel__orb" aria-hidden="true" />
-        <h2 className="tips-panel__heading">{t.tipsHeading}</h2>
-        <div className="tips-grid">
-          <article className="tip-card">
-            <span className="tip-card__icon" aria-hidden="true">
-              <Icon name="upload" size={18} />
-            </span>
-            <div className="tip-card__copy">
-              <h3>{t.tipAddTitle}</h3>
-              <p>{t.tipAddBody}</p>
-            </div>
-          </article>
-          <article className="tip-card">
-            <span className="tip-card__icon" aria-hidden="true">
-              <Icon name="more-horizontal" size={18} />
-            </span>
-            <div className="tip-card__copy">
-              <h3>{t.tipGapTitle}</h3>
-              <p>{t.tipGapBody}</p>
-            </div>
-          </article>
-          <article className="tip-card">
-            <span className="tip-card__icon" aria-hidden="true">
-              <Icon name="download" size={18} />
-            </span>
-            <div className="tip-card__copy">
-              <h3>{t.tipSaveTitle}</h3>
-              <p>{t.tipSaveBody}</p>
-            </div>
-          </article>
-        </div>
-      </footer>
-
       {isLocalPreview ? (
         <button
           type="button"
