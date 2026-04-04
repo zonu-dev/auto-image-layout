@@ -342,7 +342,7 @@
   align-items: center;
   gap: 20px;
   padding: 16px;
-  background: var(--surface-soft);
+  background: #ffffff;
   border-radius: 2rem;
 }
 
