@@ -10,12 +10,21 @@ import {
 import './App.css'
 import {
   buildRenderPlan,
-  describeCanvasLimit,
   type Direction,
   type ExportFormat,
   type LayoutImage,
 } from './lib/layout'
 import Icon from './components/Icon'
+import LanguageSwitcher from './components/LanguageSwitcher'
+import {
+  describeCanvasLimitForLocale,
+  getTopPageHref,
+  readLocaleFromLocation,
+  resolveInitialLocale,
+  STRINGS,
+  syncLocaleState,
+  type Locale,
+} from './i18n'
 
 type UploadedImage = LayoutImage & {
   name: string
@@ -32,7 +41,6 @@ type LoadedImage = {
 const DEFAULT_BACKGROUND = '#000000'
 const DEFAULT_GAP = 0
 const DOWNLOAD_PREFIX = 'auto-image-layout'
-
 const FORMAT_OPTIONS: Array<{
   extension: string
   label: string
@@ -52,6 +60,9 @@ function App() {
   const [format, setFormat] = useState<ExportFormat>('image/png')
   const [isFileDragActive, setIsFileDragActive] = useState(false)
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null)
+  const [locale, setLocale] = useState<Locale>(() => resolveInitialLocale())
+  const [isLocalPreview] = useState(() => isLocalPreviewHost())
+  const [isMobilePreview, setIsMobilePreview] = useState(() => hasMobilePreviewQuery())
   const [, startTransition] = useTransition()
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -67,9 +78,12 @@ function App() {
   const normalizedBackgroundColor = normalizeHexColor(backgroundColor)
   const safeBackgroundColor = normalizedBackgroundColor ?? DEFAULT_BACKGROUND
   const activeFormat = FORMAT_OPTIONS.find((option) => option.value === format) ?? FORMAT_OPTIONS[0]
-  const normalizeLabel = direction === 'horizontal' ? '高さを揃える' : '幅を揃える'
-  const directionLabel = direction === 'horizontal' ? '横並び' : '縦並び'
-  const normalizeSummary = normalizeCrossAxis ? '自動で揃える' : '元の比率を保つ'
+  const t = STRINGS[locale]
+  const normalizeLabel =
+    direction === 'horizontal' ? t.normalizeLabelHorizontal : t.normalizeLabelVertical
+  const directionLabel =
+    direction === 'horizontal' ? t.directionHorizontal : t.directionVertical
+  const normalizeSummary = normalizeCrossAxis ? t.normalizeSummaryOn : t.normalizeSummaryOff
   const previewPlan =
     deferredItems.length > 0
       ? buildRenderPlan(deferredItems, {
@@ -78,7 +92,7 @@ function App() {
           normalizeCrossAxis: deferredNormalizeCrossAxis,
         })
       : null
-  const previewError = previewPlan ? describeCanvasLimit(previewPlan) : null
+  const previewError = previewPlan ? describeCanvasLimitForLocale(previewPlan, locale) : null
   const previewState = previewPlan
     ? { width: previewPlan.width, height: previewPlan.height }
     : null
@@ -86,11 +100,42 @@ function App() {
   const backgroundLabel = safeBackgroundColor.toUpperCase()
   const previewSizeLabel = previewState
     ? `${previewState.width}×${previewState.height}px`
-    : 'サイズ未確定'
+    : t.outputSizePending
+  const topPageHref = getTopPageHref(locale, isMobilePreview)
 
   useEffect(() => {
     itemsRef.current = items
   }, [items])
+
+  useEffect(() => {
+    document.body.classList.toggle('mobile-preview', isMobilePreview)
+    document.body.classList.toggle('is-local-preview', isLocalPreview)
+
+    return () => {
+      document.body.classList.remove('mobile-preview')
+      document.body.classList.remove('is-local-preview')
+    }
+  }, [isLocalPreview, isMobilePreview])
+
+  useEffect(() => {
+    syncLocaleState(locale, isMobilePreview, t.pageTitle)
+  }, [isMobilePreview, locale, t.pageTitle])
+
+  useEffect(() => {
+    function handlePopState() {
+      setIsMobilePreview(hasMobilePreviewQuery())
+      const nextLocale = readLocaleFromLocation()
+
+      if (nextLocale) {
+        setLocale(nextLocale)
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+    }
+  }, [])
 
   useEffect(() => {
     const cache = imageCacheRef.current
@@ -280,48 +325,33 @@ function App() {
   }
 
   return (
-    <main className="app-shell theme-auto">
+    <main className={`app-shell theme-auto ${isMobilePreview ? 'is-mobile-preview' : ''}`}>
       <header className="page-header">
-        <section className="hero-card solid-shadow">
-          <div className="page-toolbar">
+        <div className="document-toolbar">
+          <div className="document-toolbar__controls">
             <a
-              className="zoochi-link"
-              href="https://zoochigames.com/index.html"
-              aria-label="ZOOCHIのトップページへ"
+              className="document-home-link"
+              href={topPageHref}
+              aria-label={t.topPageAria}
             >
-              <img src="/zoochi-logo.png" alt="ZOOCHI" />
+              <img src="/zoochi-logo.png" alt="ZOOCHI" className="brand-logo" />
             </a>
 
-            <a className="page-toolbar__link toy-btn" href="https://zoochigames.com/index.html">
-              トップページへ
-            </a>
+            <LanguageSwitcher ariaLabel={t.languageLabel} locale={locale} onChange={setLocale} />
           </div>
+        </div>
 
-          <div className="hero-card__hero">
-            <div className="hero-card__badge-wrap" aria-hidden="true">
-              <div className="hero-card__badge">
-                <img src="/app-icon.png" alt="" className="hero-card__badge-icon" />
+        <section className="header-card solid-shadow">
+          <div className="header-card__hero">
+            <div className="wobble-container app-card__wobble app-card__wobble--positive" aria-hidden="true">
+              <div className="wobble-target app-badge app-badge--auto">
+                <img src="/app-icon.png" alt="" className="app-badge__icon" />
               </div>
             </div>
 
-            <div className="hero-card__copy">
-              <div className="meta-pills">
-                <span className="meta-pill meta-pill--brand">AUTO IMAGE LAYOUT</span>
-                <span className="meta-pill">ブラウザでそのまま保存</span>
-                <span className="meta-pill">順番もすぐ入れ替え</span>
-              </div>
-
-              <h1 className="hero-title">画像を1枚につなげる</h1>
-
-              <p className="hero-copy">
-                複数の画像を横または縦に並べて、1枚の画像として保存できます。順番、間隔、背景色を変えると、仕上がりがその場で反映されます。
-              </p>
-
-              <ul className="feature-tags" aria-label="主な特徴">
-                <li>ドラッグで並び替え</li>
-                <li>横並びも縦並びも対応</li>
-                <li>PNG / JPEG / WebPで保存</li>
-              </ul>
+            <div className="header-card__copy">
+              <h1>Auto Image Layout</h1>
+              <p>{t.headerSummary}</p>
             </div>
           </div>
         </section>
@@ -332,8 +362,8 @@ function App() {
           <div className="panel-heading">
             <span className="panel-heading__number">1</span>
             <div className="panel-heading__copy">
-              <h2>設定と画像</h2>
-              <p>追加、並び替え、書き出し設定をここで整えます。</p>
+              <h2>{t.settingsTitle}</h2>
+              <p>{t.settingsDescription}</p>
             </div>
           </div>
 
@@ -341,9 +371,9 @@ function App() {
             <div className="subsection-header">
               <div className="title-with-icon">
                 <Icon name="upload" size={18} />
-                <h3>画像を追加</h3>
+                <h3>{t.addImagesTitle}</h3>
               </div>
-              <span className="subtle-pill">{items.length}枚</span>
+              <span className="subtle-pill">{t.imageCount(items.length)}</span>
             </div>
 
             <button
@@ -355,13 +385,13 @@ function App() {
               onDragEnter={handleFileDragOver}
               onDragLeave={() => setIsFileDragActive(false)}
             >
-              <span className="dropzone-head">
-                <span className="dropzone-icon-wrap">
-                  <Icon name="upload" className="dropzone-icon" size={20} />
+                <span className="dropzone-head">
+                  <span className="dropzone-icon-wrap">
+                    <Icon name="upload" className="dropzone-icon" size={20} />
+                  </span>
+                <span className="dropzone-title">{t.dropzoneTitle}</span>
                 </span>
-                <span className="dropzone-title">ドラッグ&amp;ドロップ、またはクリックして選択</span>
-              </span>
-              <span className="dropzone-copy">複数画像をまとめて追加できます。</span>
+              <span className="dropzone-copy">{t.dropzoneCopy}</span>
             </button>
 
             <input
@@ -378,13 +408,13 @@ function App() {
             <div className="subsection-header">
               <div className="title-with-icon">
                 <Icon name="sliders" size={18} />
-                <h3>見た目を決める</h3>
+                <h3>{t.appearanceTitle}</h3>
               </div>
             </div>
 
             <div className="settings-list">
               <div className="setting-block">
-                <span className="setting-caption">並び方向</span>
+                <span className="setting-caption">{t.directionCaption}</span>
                 <div className="direction-picker">
                   <button
                     type="button"
@@ -397,7 +427,7 @@ function App() {
                     <span className="direction-icon-wrap">
                       <Icon name="arrow-right" size={18} className="direction-icon" />
                     </span>
-                    <span className="direction-card-title">横並び</span>
+                    <span className="direction-card-title">{t.directionHorizontal}</span>
                   </button>
                   <button
                     type="button"
@@ -410,7 +440,7 @@ function App() {
                     <span className="direction-icon-wrap">
                       <Icon name="arrow-down" size={18} className="direction-icon" />
                     </span>
-                    <span className="direction-card-title">縦並び</span>
+                    <span className="direction-card-title">{t.directionVertical}</span>
                   </button>
                 </div>
               </div>
@@ -438,8 +468,8 @@ function App() {
                 <span className="setting-label">
                   <Icon name="more-horizontal" size={16} className="field-icon" />
                   <span className="field-copy">
-                    <span className="field-label">間隔</span>
-                    <span className="field-value">{gap}px</span>
+                        <span className="field-label">{t.gapLabel}</span>
+                        <span className="field-value">{gap}px</span>
                   </span>
                 </span>
                 <input
@@ -457,7 +487,7 @@ function App() {
                   <span className="setting-label">
                     <Icon name="droplet" size={16} className="field-icon" />
                     <span className="field-copy">
-                      <span className="field-label">背景色</span>
+                      <span className="field-label">{t.backgroundColorLabel}</span>
                       <span className="field-value">{backgroundLabel}</span>
                     </span>
                   </span>
@@ -466,7 +496,7 @@ function App() {
                       type="color"
                       value={safeBackgroundColor}
                       onChange={(event) => setBackgroundColor(event.target.value)}
-                      aria-label="背景色"
+                      aria-label={t.backgroundColorLabel}
                     />
                     <input
                       className="compact-input color-text-input"
@@ -479,7 +509,7 @@ function App() {
                   </div>
                 </div>
                 {normalizedBackgroundColor === null && (
-                  <span className="field-help">#RGB または #RRGGBB で入力してください。</span>
+                  <span className="field-help">{t.invalidHex}</span>
                 )}
               </div>
 
@@ -487,7 +517,7 @@ function App() {
                 <span className="setting-label">
                   <Icon name="file-text" size={16} className="field-icon" />
                   <span className="field-copy">
-                    <span className="field-label">書き出し形式</span>
+                    <span className="field-label">{t.exportFormatLabel}</span>
                     <span className="field-value">{activeFormat.label}</span>
                   </span>
                 </span>
@@ -510,7 +540,7 @@ function App() {
             <div className="subsection-header">
               <div className="title-with-icon">
                 <Icon name="image" size={18} />
-                <h3>画像一覧</h3>
+                <h3>{t.imageListTitle}</h3>
               </div>
               <button
                 type="button"
@@ -519,17 +549,17 @@ function App() {
                 disabled={items.length === 0}
               >
                 <Icon name="trash-2" size={16} />
-                クリア
+                {t.clearLabel}
               </button>
             </div>
 
             {items.length === 0 ? (
               <div className="empty-card">
                 <Icon name="image" className="empty-icon" size={28} />
-                <p>画像を追加するとここに一覧が表示されます。</p>
+                <p>{t.imageListEmpty}</p>
               </div>
             ) : (
-              <div className="image-list" role="list" aria-label="アップロード画像一覧">
+              <div className="image-list" role="list" aria-label={t.uploadedImagesAria}>
                 {items.map((item, index) => (
                   <article
                     key={item.id}
@@ -553,7 +583,7 @@ function App() {
                         className="icon-button"
                         onClick={() => moveItem(item.id, index - 1)}
                         disabled={index === 0}
-                        aria-label={`${item.name} を上へ移動`}
+                        aria-label={t.moveUp(item.name)}
                       >
                         <Icon name="arrow-up" size={16} />
                       </button>
@@ -563,7 +593,7 @@ function App() {
                         className="icon-button"
                         onClick={() => moveItem(item.id, index + 1)}
                         disabled={index === items.length - 1}
-                        aria-label={`${item.name} を下へ移動`}
+                        aria-label={t.moveDown(item.name)}
                       >
                         <Icon name="arrow-down" size={16} />
                       </button>
@@ -586,8 +616,8 @@ function App() {
                         type="button"
                         className="icon-button"
                         onClick={() => removeItem(item.id)}
-                        aria-label={`${item.name} を削除`}
-                        title="削除"
+                        aria-label={t.removeItem(item.name)}
+                        title={t.deleteTitle}
                       >
                         <Icon name="trash-2" size={16} />
                       </button>
@@ -603,26 +633,26 @@ function App() {
           <div className="panel-heading">
             <span className="panel-heading__number">2</span>
             <div className="panel-heading__copy">
-              <h2>プレビュー</h2>
-              <p>仕上がりサイズを確認して、そのまま保存できます。</p>
+              <h2>{t.previewTitle}</h2>
+              <p>{t.previewDescription}</p>
             </div>
           </div>
 
-          <div className="summary-grid" aria-label="現在の状態">
+          <div className="summary-grid" aria-label={t.currentStateAria}>
             <div className="summary-card">
-              <span className="summary-card__label">画像</span>
-              <strong>{items.length}枚</strong>
+              <span className="summary-card__label">{t.summaryImages}</span>
+              <strong>{t.imageCount(items.length)}</strong>
             </div>
             <div className="summary-card">
-              <span className="summary-card__label">配置</span>
+              <span className="summary-card__label">{t.summaryLayout}</span>
               <strong>{directionLabel}</strong>
             </div>
             <div className="summary-card">
-              <span className="summary-card__label">出力サイズ</span>
+              <span className="summary-card__label">{t.summaryOutputSize}</span>
               <strong>{previewSizeLabel}</strong>
             </div>
             <div className="summary-card">
-              <span className="summary-card__label">背景色</span>
+              <span className="summary-card__label">{t.summaryBackground}</span>
               <strong>{backgroundLabel}</strong>
             </div>
           </div>
@@ -633,7 +663,7 @@ function App() {
             <div className="subsection-header subsection-header--preview">
               <div className="title-with-icon">
                 <Icon name="eye" size={18} />
-                <h3>仕上がり</h3>
+                <h3>{t.resultTitle}</h3>
               </div>
               <button
                 type="button"
@@ -641,7 +671,7 @@ function App() {
                 onClick={() => void handleDownload()}
                 disabled={!canDownload}
               >
-                <span className="action-button__label">この設定で保存</span>
+                <span className="action-button__label">{t.saveCurrentLabel}</span>
                 <span className="action-button__icon" aria-hidden="true">
                   <Icon name="arrow-right" size={16} />
                 </span>
@@ -652,8 +682,8 @@ function App() {
               {items.length === 0 ? (
                 <div className="preview-placeholder">
                   <Icon name="image" className="empty-icon" size={32} />
-                  <h3>画像がありません</h3>
-                  <p>左側から画像を追加すると、ここに仕上がりが表示されます。</p>
+                  <h3>{t.noImagesTitle}</h3>
+                  <p>{t.noImagesBody}</p>
                 </div>
               ) : (
                 <div className="canvas-wrap">
@@ -667,15 +697,15 @@ function App() {
 
       <footer className="tips-panel solid-shadow">
         <div className="tips-panel__orb" aria-hidden="true" />
-        <h2 className="tips-panel__heading">使い方のヒント</h2>
+        <h2 className="tips-panel__heading">{t.tipsHeading}</h2>
         <div className="tips-grid">
           <article className="tip-card">
             <span className="tip-card__icon" aria-hidden="true">
               <Icon name="upload" size={18} />
             </span>
             <div className="tip-card__copy">
-              <h3>まとめて追加</h3>
-              <p>複数画像を一度に入れて、あとから順番を整えられます。</p>
+              <h3>{t.tipAddTitle}</h3>
+              <p>{t.tipAddBody}</p>
             </div>
           </article>
           <article className="tip-card">
@@ -683,8 +713,8 @@ function App() {
               <Icon name="more-horizontal" size={18} />
             </span>
             <div className="tip-card__copy">
-              <h3>間隔と背景色</h3>
-              <p>透過画像を使うときは背景色を決めると仕上がりが安定します。</p>
+              <h3>{t.tipGapTitle}</h3>
+              <p>{t.tipGapBody}</p>
             </div>
           </article>
           <article className="tip-card">
@@ -692,18 +722,49 @@ function App() {
               <Icon name="download" size={18} />
             </span>
             <div className="tip-card__copy">
-              <h3>保存前に確認</h3>
-              <p>サイズが大きすぎると保存できないので、警告が出たら設定を見直してください。</p>
+              <h3>{t.tipSaveTitle}</h3>
+              <p>{t.tipSaveBody}</p>
             </div>
           </article>
         </div>
       </footer>
+
+      {isLocalPreview ? (
+        <button
+          type="button"
+          className="view-toggle"
+          aria-pressed={isMobilePreview}
+          onClick={() => setIsMobilePreview((current) => !current)}
+        >
+          <span className="view-toggle__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" strokeWidth="2.5">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
+              />
+            </svg>
+          </span>
+          <span className="view-toggle__label">
+            {isMobilePreview ? t.previewDesktopLabel : t.previewMobileLabel}
+          </span>
+        </button>
+      ) : null}
     </main>
   )
 }
 
 function containsDraggedFiles(event: DragEvent<HTMLElement>) {
   return Array.from(event.dataTransfer.types).includes('Files')
+}
+
+function isLocalPreviewHost() {
+  const host = window.location.hostname.toLowerCase()
+  return host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '[::1]'
+}
+
+function hasMobilePreviewQuery() {
+  return new URLSearchParams(window.location.search).get('view') === 'mobile'
 }
 
 function createImageId() {
@@ -779,7 +840,7 @@ function readImage(url: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image()
     image.onload = () => resolve(image)
-    image.onerror = () => reject(new Error('画像を読み込めませんでした。'))
+    image.onerror = () => reject(new Error('Failed to load image.'))
     image.decoding = 'async'
     image.src = url
   })
