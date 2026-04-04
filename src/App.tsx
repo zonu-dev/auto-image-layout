@@ -444,7 +444,7 @@ function App() {
                 </div>
               </div>
 
-              <div className="setting-row">
+              <div className="setting-row setting-row--switch">
                 <span className="setting-label">
                   <Icon name="maximize-2" size={16} className="field-icon" />
                   <span className="field-copy">
