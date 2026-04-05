@@ -14,6 +14,7 @@ export type IconName =
   | 'sliders'
   | 'trash-2'
   | 'upload'
+  | 'x'
 
 type IconProps = {
   className?: string
