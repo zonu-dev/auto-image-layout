@@ -2400,8 +2400,8 @@ body.is-local-preview .app-footer {
 }
 
 .control-grid--bordered {
-  padding-top: 12px;
-  border-top: 2px solid #eef2f7;
+  padding-top: 4px;
+  border-top: 0;
 }
 
 .mini-card {

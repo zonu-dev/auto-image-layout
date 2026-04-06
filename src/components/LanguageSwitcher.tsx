@@ -7,6 +7,8 @@ type LanguageSwitcherProps = {
   onChange: (locale: Locale) => void
 }
 
+const ASSET_BASE = import.meta.env.BASE_URL
+
 export default function LanguageSwitcher(props: LanguageSwitcherProps) {
   const { ariaLabel, locale, onChange } = props
   const [isOpen, setIsOpen] = useState(false)
@@ -170,7 +172,7 @@ export default function LanguageSwitcher(props: LanguageSwitcherProps) {
       >
         <img
           className="language-switcher__flag"
-          src={`/flags/${currentOption.flagCode}.svg`}
+          src={`${ASSET_BASE}flags/${currentOption.flagCode}.svg`}
           alt=""
           aria-hidden="true"
         />
@@ -205,7 +207,7 @@ export default function LanguageSwitcher(props: LanguageSwitcherProps) {
             >
               <img
                 className="language-picker__option-flag"
-                src={`/flags/${option.flagCode}.svg`}
+                src={`${ASSET_BASE}flags/${option.flagCode}.svg`}
                 alt=""
                 aria-hidden="true"
               />

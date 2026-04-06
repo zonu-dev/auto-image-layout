@@ -58,6 +58,7 @@ const DEFAULT_BACKGROUND = '#000000'
 const DEFAULT_GAP = 0
 const DOWNLOAD_PREFIX = 'auto-image-layout'
 const APP_VERSION = __APP_VERSION__
+const ASSET_BASE = import.meta.env.BASE_URL
 const CONTACT_EMAIL = 'contact@zoochigames.com'
 const MARSHMALLOW_URL =
   'https://marshmallow-qa.com/4q8wumfpc9uj4w6?t=WQvBkW&utm_medium=url_text&utm_source=promotion'
@@ -763,7 +764,7 @@ function App() {
               href={topPageHref}
               aria-label={t.topPageAria}
             >
-              <img src="/zoochi-logo.png" alt="ZOOCHI" className="brand-logo" />
+              <img src={`${ASSET_BASE}zoochi-logo.png`} alt="ZOOCHI" className="brand-logo" />
             </a>
 
             <LanguageSwitcher ariaLabel={t.languageLabel} locale={locale} onChange={setLocale} />
@@ -774,7 +775,7 @@ function App() {
           <div className="header-card__hero">
             <div className="wobble-container app-card__wobble app-card__wobble--positive" aria-hidden="true">
               <div className="wobble-target app-badge app-badge--auto">
-                <img src="/app-icon.png" alt="" className="app-badge__icon" />
+                <img src={`${ASSET_BASE}app-icon.png`} alt="" className="app-badge__icon" />
               </div>
             </div>
 
@@ -1341,7 +1342,11 @@ function App() {
               >
                 <span className="wobble-container" aria-hidden="true">
                   <span className="wobble-target contact-modal__link-icon contact-modal__link-icon--marshmallow">
-                    <img src="/marshmallow-logo.svg" alt="" className="contact-modal__marshmallow-logo" />
+                    <img
+                      src={`${ASSET_BASE}marshmallow-logo.svg`}
+                      alt=""
+                      className="contact-modal__marshmallow-logo"
+                    />
                   </span>
                 </span>
                 <span className="contact-modal__link-copy">
