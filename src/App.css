@@ -1971,19 +1971,42 @@ body.is-local-preview .app-footer {
 
 .settings-column,
 .preview-column {
+  position: relative;
   display: grid;
   gap: 18px;
   align-content: start;
   min-width: 0;
 }
 
+.settings-column {
+  z-index: 2;
+}
+
+.preview-column {
+  z-index: 1;
+}
+
 .compact-panel {
+  position: relative;
   display: grid;
   gap: 14px;
   padding: 18px;
   background: var(--surface);
   border: 3px solid var(--line);
   border-radius: 2rem;
+}
+
+.compact-panel--controls {
+  overflow: visible;
+  z-index: 2;
+}
+
+.compact-panel--controls.is-popover-open {
+  z-index: 80;
+}
+
+.compact-panel--preview {
+  z-index: 1;
 }
 
 .compact-panel__heading {

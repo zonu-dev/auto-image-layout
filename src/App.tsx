@@ -950,7 +950,11 @@ function App() {
             ) : null}
           </section>
 
-          <section className="compact-panel compact-panel--controls solid-shadow enter-stage enter-stage--4">
+          <section
+            className={`compact-panel compact-panel--controls solid-shadow enter-stage enter-stage--4 ${
+              isColorPickerOpen || isFormatMenuOpen ? 'is-popover-open' : ''
+            }`}
+          >
             <div className="compact-panel__heading compact-panel__heading--simple">
               <Icon name="sliders" size={18} className="compact-panel__lead-icon" />
               <h2>{t.appearanceTitle}</h2>
