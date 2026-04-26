@@ -11,6 +11,8 @@
 - `AI_AGENT_WEB_GUIDELINES.md` の「UI テキストは日本語」は `ja` ロケールの文体ルールとして扱い、公開 UI の6ロケール対応は維持する。
 - app-pages 配信では `/apps/auto-image-layout/` base path を前提にする。asset、canonical、OG、Twitter card、structured data、robots、sitemap の URL を同じ public path に揃える。
 - 画像・ロゴ・flag などの asset 参照は `import.meta.env.BASE_URL` または `%BASE_URL%` ベースにする。
+- `main` に入るユーザー向け変更は原則 patch version を上げる。UI、CSS、挙動、公開 asset、build 設定を変えたら、commit 前に `npm run release:patch` を実行する。
+- version bump 漏れを確認するときは `npm run check:version-bump` を使う。この guard は `src/`, `public/`, `index.html`, Vite/TS config の変更に対して `package.json` の version 増加を要求する。
 - 変更後は可能な範囲で `npm run lint`、`npm run test`、`npm run build` を実行する。app-pages への組み込み確認では `npm run build:app-pages` も使う。
 
 デザインと Web UI ガイダンス:
