@@ -14,6 +14,7 @@
 - `main` に入るユーザー向け変更は原則 patch version を上げる。UI、CSS、挙動、公開 asset、build 設定を変えたら、commit 前に `npm run release:patch` を実行する。
 - version bump 漏れを確認するときは `npm run check:version-bump` を使う。この guard は `src/`, `public/`, `index.html`, Vite/TS config の変更に対して `package.json` の version 増加を要求する。
 - 変更後は可能な範囲で `npm run lint`、`npm run test`、`npm run build` を実行する。app-pages への組み込み確認では `npm run build:app-pages` も使う。
+- Codex App で実行されているセッションで UI、レイアウト、CSS、インタラクションを変更した場合は、ローカルサーバーを起動し、Codex App 内蔵ブラウザ（Browser Use）で動作確認やスクリーンショット撮影を行う。外部ブラウザや macOS `open` だけで確認を済ませない。
 
 デザインと Web UI ガイダンス:
 
