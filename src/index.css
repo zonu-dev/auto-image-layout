@@ -16,6 +16,7 @@
   --surface-dark: #1e293b;
 
   --text: #1e293b;
+  --text-strong: #0f172a;
   --muted: #64748b;
   --line: #cbd5e1;
   --line-strong: #cbd5e1;
@@ -29,6 +30,9 @@
   --orange-deep: #ea580c;
   --orange-soft: #fff7ed;
   --orange-soft-border: #fed7aa;
+  --amber: #fbbf24;
+  --marshmallow-pink: #ff80a1;
+  --danger: #dc2626;
 
   --theme-accent: var(--orange);
   --theme-accent-deep: var(--orange-deep);

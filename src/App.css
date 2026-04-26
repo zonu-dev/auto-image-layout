@@ -93,7 +93,7 @@
 }
 
 .app-shell {
-  width: min(1120px, calc(100% - 32px));
+  width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
   padding: 40px 0 48px;
   display: flex;
@@ -1214,7 +1214,7 @@ button:focus-visible {
 .action-button:hover:not(:disabled) {
   border-color: var(--theme-accent);
   background: var(--theme-accent);
-  color: #ffffff;
+  color: var(--text-strong);
 }
 
 .action-button:hover:not(:disabled) .action-button__icon {
